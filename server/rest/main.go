@@ -14,4 +14,6 @@ func main() {
 	e.PUT("/api/users", uh.Update)
 	e.POST("/api/users", uh.Create)
 	e.DELETE("/api/users", uh.Delete)
+
+	e.Logger.Fatal(e.Start(":8080"))
 }

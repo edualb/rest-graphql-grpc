@@ -1,6 +1,11 @@
 package handlers
 
-import "github.com/labstack/echo"
+import (
+	"net/http"
+
+	"github.com/edualb/rest-graphql-grpc/server/rest/models"
+	"github.com/labstack/echo"
+)
 
 type UserHandler interface {
 	Create(c echo.Context) error
@@ -9,24 +14,37 @@ type UserHandler interface {
 	Delete(c echo.Context) error
 }
 
-type UserHandlerImpl struct {}
+var users *models.Users
+
+type UserHandlerImpl struct{}
 
 func NewUserHandler() UserHandler {
 	return &UserHandlerImpl{}
 }
 
-func (uh *UserHandlerImpl) 	Create(c echo.Context) error {
-	return nil
+func (uh *UserHandlerImpl) Create(c echo.Context) error {
+	var u models.Users
+	if err := c.Bind(&u); err != nil {
+		return err
+	}
+	users = &u
+	return c.JSON(http.StatusOK, users)
 }
 
-func (uh *UserHandlerImpl) 	Read(c echo.Context) error {
-	return nil
+func (uh *UserHandlerImpl) Read(c echo.Context) error {
+	return c.JSON(http.StatusOK, users)
 }
 
-func (uh *UserHandlerImpl) 	Update(c echo.Context) error {
-	return nil
+func (uh *UserHandlerImpl) Update(c echo.Context) error {
+	var u models.Users
+	if err := c.Bind(&u); err != nil {
+		return err
+	}
+	users = &u
+	return c.JSON(http.StatusOK, users)
 }
 
-func (uh *UserHandlerImpl) 	Delete(c echo.Context) error {
-	return nil
+func (uh *UserHandlerImpl) Delete(c echo.Context) error {
+	users = nil
+	return c.JSON(http.StatusOK, users)
 }
