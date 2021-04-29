@@ -14,12 +14,14 @@ type UserHandler interface {
 	Delete(c echo.Context) error
 }
 
-var users *models.Users
-
-type UserHandlerImpl struct{}
+type UserHandlerImpl struct {
+	db models.UsersDB
+}
 
 func NewUserHandler() UserHandler {
-	return &UserHandlerImpl{}
+	return &UserHandlerImpl{
+		db: models.NewUsersDB(),
+	}
 }
 
 func (uh *UserHandlerImpl) Create(c echo.Context) error {
@@ -27,12 +29,21 @@ func (uh *UserHandlerImpl) Create(c echo.Context) error {
 	if err := c.Bind(&u); err != nil {
 		return err
 	}
-	users = &u
-	return c.JSON(http.StatusOK, users)
+
+	if err := uh.db.CreateUser(u); err != nil {
+		return c.JSON(http.StatusInternalServerError, nil)
+	}
+
+	return c.JSON(http.StatusOK, u)
 }
 
 func (uh *UserHandlerImpl) Read(c echo.Context) error {
-	return c.JSON(http.StatusOK, users)
+	name := c.Param("name")
+	u, err := uh.db.FindUserByName(name)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, err.Error())
+	}
+	return c.JSON(http.StatusOK, u)
 }
 
 func (uh *UserHandlerImpl) Update(c echo.Context) error {
@@ -40,11 +51,23 @@ func (uh *UserHandlerImpl) Update(c echo.Context) error {
 	if err := c.Bind(&u); err != nil {
 		return err
 	}
-	users = &u
-	return c.JSON(http.StatusOK, users)
+
+	if err := uh.db.UpdateUser(u); err != nil {
+		return c.JSON(http.StatusInternalServerError, err.Error())
+	}
+
+	return c.JSON(http.StatusOK, u)
 }
 
 func (uh *UserHandlerImpl) Delete(c echo.Context) error {
-	users = nil
-	return c.JSON(http.StatusOK, users)
+	var u models.Users
+	if err := c.Bind(&u); err != nil {
+		return err
+	}
+
+	if err := uh.db.DeleteUser(u); err != nil {
+		return c.JSON(http.StatusInternalServerError, nil)
+	}
+
+	return c.JSON(http.StatusOK, u)
 }

@@ -10,7 +10,7 @@ func main() {
 
 	uh := handlers.NewUserHandler()
 
-	e.GET("/api/users", uh.Read)
+	e.GET("/api/users/:name", uh.Read)
 	e.PUT("/api/users", uh.Update)
 	e.POST("/api/users", uh.Create)
 	e.DELETE("/api/users", uh.Delete)
