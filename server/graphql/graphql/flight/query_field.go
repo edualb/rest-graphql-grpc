@@ -21,7 +21,7 @@ func newFlightQueryField() FlightQueryField {
 
 func (u *FlightQueryFieldImpl) flight() *gql.Field {
 	return &gql.Field{
-		Type:        userType,
+		Type:        FlightType,
 		Description: "Get product by id",
 		Args: gql.FieldConfigArgument{
 			"id": &gql.ArgumentConfig{

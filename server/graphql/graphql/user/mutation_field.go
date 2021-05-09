@@ -1,6 +1,8 @@
 package user
 
 import (
+	"fmt"
+
 	"github.com/edualb/rest-graphql-grpc/server/graphql/models"
 	gql "github.com/graphql-go/graphql"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -86,12 +88,11 @@ func (p *UserMutationFieldImpl) updateUser() *gql.Field {
 
 			if idOK {
 
-				flightIDs, flightIDsOK := params.Args["flight_ids"].([]string)
-
+				flightIDs, flightIDsOK := params.Args["flight_ids"].([]interface{})
 				if flightIDsOK {
 					ids := []primitive.ObjectID{}
 					for _, id := range flightIDs {
-						primitiveID, err := primitive.ObjectIDFromHex(id)
+						primitiveID, err := primitive.ObjectIDFromHex(fmt.Sprintf("%v", id))
 						if err != nil {
 							return nil, err
 						}
@@ -109,10 +110,10 @@ func (p *UserMutationFieldImpl) updateUser() *gql.Field {
 						return nil, err
 					}
 				}
-				return user, nil
+				return &user, nil
 			}
 
-			return user, nil
+			return &user, nil
 		},
 	}
 }

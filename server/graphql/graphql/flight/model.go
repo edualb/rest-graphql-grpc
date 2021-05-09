@@ -2,7 +2,7 @@ package flight
 
 import gql "github.com/graphql-go/graphql"
 
-var userType = gql.NewObject(
+var FlightType = gql.NewObject(
 	gql.ObjectConfig{
 		Name: "Flight",
 		Fields: gql.Fields{

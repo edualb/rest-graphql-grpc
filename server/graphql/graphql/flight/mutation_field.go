@@ -23,7 +23,7 @@ func newFlightMutationField() FlightMutationField {
 
 func (p *FlightMutationFieldImpl) createFlight() *gql.Field {
 	return &gql.Field{
-		Type:        userType,
+		Type:        FlightType,
 		Description: "Create new flight",
 		Args: gql.FieldConfigArgument{
 			"from": &gql.ArgumentConfig{
@@ -74,7 +74,7 @@ func (p *FlightMutationFieldImpl) createFlight() *gql.Field {
 
 func (p *FlightMutationFieldImpl) updateFlight() *gql.Field {
 	return &gql.Field{
-		Type:        userType,
+		Type:        FlightType,
 		Description: "Create new user",
 		Args: gql.FieldConfigArgument{
 			"id": &gql.ArgumentConfig{
