@@ -1,16 +1,22 @@
 package flight
 
-import gql "github.com/graphql-go/graphql"
+import (
+	"github.com/edualb/rest-graphql-grpc/server/graphql/models"
+	gql "github.com/graphql-go/graphql"
+)
 
 type FlightQueryField interface {
 	flight() *gql.Field
-	flights() *gql.Field
 }
 
-type FlightQueryFieldImpl struct{}
+type FlightQueryFieldImpl struct {
+	db models.FlightsDB
+}
 
 func newFlightQueryField() FlightQueryField {
-	return &FlightQueryFieldImpl{}
+	return &FlightQueryFieldImpl{
+		db: models.NewFlightsDB(),
+	}
 }
 
 func (u *FlightQueryFieldImpl) flight() *gql.Field {
@@ -23,27 +29,16 @@ func (u *FlightQueryFieldImpl) flight() *gql.Field {
 			},
 		},
 		Resolve: func(p gql.ResolveParams) (interface{}, error) {
-			_, ok := p.Args["id"].(string)
+			id, ok := p.Args["id"].(string)
 			if ok {
-				// get user mongo by id
-				// 	// Find product
-				// 	for _, p := range Products {
-				// 		if int(p.ID) == id {
-				// 			return p, nil
-				// 		}
-				// 	}
-			}
-			return nil, nil
-		},
-	}
-}
+				flight, err := u.db.FindFlightByID(id)
 
-func (u *FlightQueryFieldImpl) flights() *gql.Field {
-	return &gql.Field{
-		Type:        gql.NewList(userType),
-		Description: "Get product list",
-		Resolve: func(params gql.ResolveParams) (interface{}, error) {
-			// get all users
+				if err != nil {
+					return nil, err
+				}
+
+				return flight, nil
+			}
 			return nil, nil
 		},
 	}

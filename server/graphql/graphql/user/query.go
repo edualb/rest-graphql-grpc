@@ -14,9 +14,5 @@ func GetAllUserQueryFields() []UserQuery {
 			QueryName: "user",
 			Field:     queryField.user(),
 		},
-		{
-			QueryName: "users",
-			Field:     queryField.users(),
-		},
 	}
 }

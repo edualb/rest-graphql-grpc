@@ -14,9 +14,5 @@ func GetAllFlightQueryFields() []UserQuery {
 			QueryName: "flight",
 			Field:     queryField.flight(),
 		},
-		{
-			QueryName: "flights",
-			Field:     queryField.flights(),
-		},
 	}
 }

@@ -1,25 +1,30 @@
 package flight
 
 import (
+	"github.com/edualb/rest-graphql-grpc/server/graphql/models"
 	gql "github.com/graphql-go/graphql"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type FlightMutationField interface {
 	createFlight() *gql.Field
 	updateFlight() *gql.Field
-	deleteFlight() *gql.Field
 }
 
-type FlightMutationFieldImpl struct{}
+type FlightMutationFieldImpl struct {
+	db models.FlightsDB
+}
 
 func newFlightMutationField() FlightMutationField {
-	return &FlightMutationFieldImpl{}
+	return &FlightMutationFieldImpl{
+		db: models.NewFlightsDB(),
+	}
 }
 
 func (p *FlightMutationFieldImpl) createFlight() *gql.Field {
 	return &gql.Field{
 		Type:        userType,
-		Description: "Create new user",
+		Description: "Create new flight",
 		Args: gql.FieldConfigArgument{
 			"from": &gql.ArgumentConfig{
 				Type: gql.NewNonNull(gql.String),
@@ -32,13 +37,37 @@ func (p *FlightMutationFieldImpl) createFlight() *gql.Field {
 			},
 		},
 		Resolve: func(params gql.ResolveParams) (interface{}, error) {
-			// Access Mongo to create
-			p := Flight{
-				ID:           "int64(rand.Intn(100000))", // generate random ID
-				From:         params.Args["from"].(string),
-				PassengerIDs: params.Args["passenger_ids"].([]string),
+			flight := models.Flights{}
+
+			passengerIDs, passengerIDsOK := params.Args["flight_ids"].([]string)
+
+			if passengerIDsOK {
+				ids := []primitive.ObjectID{}
+				for _, id := range passengerIDs {
+					primitiveID, err := primitive.ObjectIDFromHex(id)
+					if err != nil {
+						return nil, err
+					}
+					ids = append(ids, primitiveID)
+				}
+				flight.PassengerIDs = ids
 			}
-			return p, nil
+
+			from, fromOK := params.Args["from"].(string)
+			to, toOK := params.Args["to"].(string)
+
+			if fromOK && toOK {
+				flight.From = from
+				flight.To = to
+
+				err := p.db.CreateFlight(flight)
+
+				if err != nil {
+					return nil, err
+				}
+				return flight, err
+			}
+			return flight, nil
 		},
 	}
 }
@@ -48,6 +77,9 @@ func (p *FlightMutationFieldImpl) updateFlight() *gql.Field {
 		Type:        userType,
 		Description: "Create new user",
 		Args: gql.FieldConfigArgument{
+			"id": &gql.ArgumentConfig{
+				Type: gql.NewNonNull(gql.String),
+			},
 			"from": &gql.ArgumentConfig{
 				Type: gql.NewNonNull(gql.String),
 			},
@@ -59,40 +91,42 @@ func (p *FlightMutationFieldImpl) updateFlight() *gql.Field {
 			},
 		},
 		Resolve: func(params gql.ResolveParams) (interface{}, error) {
-			// Access Mongo to create
-			p := Flight{
-				ID:           "int64(rand.Intn(100000))", // generate random ID
-				From:         params.Args["from"].(string),
-				PassengerIDs: params.Args["passenger_ids"].([]string),
-			}
-			return p, nil
-		},
-	}
-}
+			id, idOK := params.Args["id"].(string)
 
-func (p *FlightMutationFieldImpl) deleteFlight() *gql.Field {
-	return &gql.Field{
-		Type:        userType,
-		Description: "Create new user",
-		Args: gql.FieldConfigArgument{
-			"from": &gql.ArgumentConfig{
-				Type: gql.NewNonNull(gql.String),
-			},
-			"to": &gql.ArgumentConfig{
-				Type: gql.NewNonNull(gql.String),
-			},
-			"passenger_ids": &gql.ArgumentConfig{
-				Type: gql.NewList(gql.String),
-			},
-		},
-		Resolve: func(params gql.ResolveParams) (interface{}, error) {
-			// Access Mongo to create
-			p := Flight{
-				ID:           "int64(rand.Intn(100000))", // generate random ID
-				From:         params.Args["from"].(string),
-				PassengerIDs: params.Args["passenger_ids"].([]string),
+			if idOK {
+				flight := models.Flights{}
+
+				passengerIDs, passengerIDsOK := params.Args["flight_ids"].([]string)
+
+				if passengerIDsOK {
+					ids := []primitive.ObjectID{}
+					for _, id := range passengerIDs {
+						primitiveID, err := primitive.ObjectIDFromHex(id)
+						if err != nil {
+							return nil, err
+						}
+						ids = append(ids, primitiveID)
+					}
+					flight.PassengerIDs = ids
+				}
+
+				from, fromOK := params.Args["from"].(string)
+				to, toOK := params.Args["to"].(string)
+
+				if fromOK && toOK {
+					flight.From = from
+					flight.To = to
+
+					err := p.db.UpdateFlightByID(id, flight)
+
+					if err != nil {
+						return nil, err
+					}
+					return flight, err
+				}
+				return flight, nil
 			}
-			return p, nil
+			return nil, nil
 		},
 	}
 }

@@ -11,16 +11,12 @@ func GetAllFlightMutationFields() []FlightMutation {
 	queryField := newFlightMutationField()
 	return []FlightMutation{
 		{
-			MutationName: "createUser",
+			MutationName: "createFlight",
 			Field:        queryField.createFlight(),
 		},
 		{
-			MutationName: "updateUser",
+			MutationName: "updateFlight",
 			Field:        queryField.updateFlight(),
-		},
-		{
-			MutationName: "deleteUser",
-			Field:        queryField.deleteFlight(),
 		},
 	}
 }
