@@ -12,16 +12,17 @@ const userCollection = "col_user"
 
 type UsersDB interface {
 	CreateUser(u Users) error
-	FindUserByName(name string) (*Users, error)
-	UpdateUser(u Users) error
-	DeleteUser(u Users) error
+	FindUserByID(id string) (*Users, error)
+	UpdateUser(id string, u Users) error
+	DeleteUserByID(id string) error
 }
 
 type UsersDBImpl struct{}
 
 type Users struct {
-	Id   primitive.ObjectID `json:"id,omitempty" bson:"_id,omitempty"`
-	Name string             `json:"name" bson:"name"`
+	Id        primitive.ObjectID   `json:"id,omitempty" bson:"_id,omitempty"`
+	Name      string               `json:"name" bson:"name"`
+	FlightIDs []primitive.ObjectID `json:"flight_ids" bson:"flight_ids,omitempty"`
 }
 
 func NewUsersDB() UsersDB {
@@ -43,10 +44,16 @@ func (udb UsersDBImpl) CreateUser(u Users) error {
 	return nil
 }
 
-func (udb UsersDBImpl) FindUserByName(name string) (*Users, error) {
+func (udb UsersDBImpl) FindUserByID(id string) (*Users, error) {
 	result := Users{}
 
-	filter := bson.D{primitive.E{Key: "name", Value: name}}
+	primitiveID, err := primitive.ObjectIDFromHex(id)
+
+	if err != nil {
+		return nil, err
+	}
+
+	filter := bson.D{primitive.E{Key: "_id", Value: primitiveID}}
 
 	client, err := db.GetMongoClient()
 	if err != nil {
@@ -63,8 +70,14 @@ func (udb UsersDBImpl) FindUserByName(name string) (*Users, error) {
 	return &result, nil
 }
 
-func (udb UsersDBImpl) UpdateUser(u Users) error {
-	filter := bson.D{primitive.E{Key: "_id", Value: u.Id}}
+func (udb UsersDBImpl) UpdateUser(id string, u Users) error {
+	primitiveID, err := primitive.ObjectIDFromHex(id)
+
+	if err != nil {
+		return err
+	}
+
+	filter := bson.D{primitive.E{Key: "_id", Value: primitiveID}}
 
 	updater := bson.D{
 		primitive.E{
@@ -73,6 +86,10 @@ func (udb UsersDBImpl) UpdateUser(u Users) error {
 				primitive.E{
 					Key:   "name",
 					Value: u.Name,
+				},
+				primitive.E{
+					Key:   "flight_ids",
+					Value: u.FlightIDs,
 				},
 			},
 		},
@@ -94,8 +111,14 @@ func (udb UsersDBImpl) UpdateUser(u Users) error {
 	return nil
 }
 
-func (udb UsersDBImpl) DeleteUser(u Users) error {
-	filter := bson.D{primitive.E{Key: "_id", Value: u.Id}}
+func (udb UsersDBImpl) DeleteUserByID(id string) error {
+	primitiveID, err := primitive.ObjectIDFromHex(id)
+
+	if err != nil {
+		return err
+	}
+
+	filter := bson.D{primitive.E{Key: "_id", Value: primitiveID}}
 
 	client, err := db.GetMongoClient()
 	if err != nil {

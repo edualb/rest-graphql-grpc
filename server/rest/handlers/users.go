@@ -38,8 +38,8 @@ func (uh *UserHandlerImpl) Create(c echo.Context) error {
 }
 
 func (uh *UserHandlerImpl) Read(c echo.Context) error {
-	name := c.Param("name")
-	u, err := uh.db.FindUserByName(name)
+	id := c.Param("id")
+	u, err := uh.db.FindUserByID(id)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
@@ -52,7 +52,9 @@ func (uh *UserHandlerImpl) Update(c echo.Context) error {
 		return err
 	}
 
-	if err := uh.db.UpdateUser(u); err != nil {
+	id := c.Param("id")
+
+	if err := uh.db.UpdateUser(id, u); err != nil {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
 
@@ -60,14 +62,11 @@ func (uh *UserHandlerImpl) Update(c echo.Context) error {
 }
 
 func (uh *UserHandlerImpl) Delete(c echo.Context) error {
-	var u models.Users
-	if err := c.Bind(&u); err != nil {
-		return err
-	}
+	id := c.Param("id")
 
-	if err := uh.db.DeleteUser(u); err != nil {
+	if err := uh.db.DeleteUserByID(id); err != nil {
 		return c.JSON(http.StatusInternalServerError, nil)
 	}
 
-	return c.JSON(http.StatusOK, u)
+	return c.JSON(http.StatusOK, id)
 }
