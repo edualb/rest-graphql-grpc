@@ -1,0 +1,48 @@
+syntax = "proto3";
+
+package rest_grpc_graphql.grpc;
+
+option go_package = "pb/";
+
+import "flight_message.proto";
+
+// CreateFlight
+message CreateFlightRequest {
+    Flight flight = 1;
+}
+
+message CreateFlightResponse {
+    string message = 1;
+}
+
+// ----------------------------
+
+// FindFlight
+message FindFlightRequest {
+    string id = 1;
+}
+
+message FindFlightResponse {
+    string message = 1;
+    Flight flight = 2;
+}
+
+// ----------------------------
+
+// UpdateUser
+message UpdateFlightRequest {
+    string id = 1;
+    Flight flight = 2;
+}
+
+message UpdateFlightResponse {
+    string message = 1;
+}
+
+// ----------------------------
+
+service FlightService {
+    rpc CreateFlight(CreateFlightRequest) returns (CreateFlightResponse) {};
+    rpc FindFlight(FindFlightRequest) returns (FindFlightResponse) {};
+    rpc UpdateFlight(UpdateFlightRequest) returns (UpdateFlightResponse) {};
+}

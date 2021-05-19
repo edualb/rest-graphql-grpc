@@ -1,0 +1,11 @@
+syntax = "proto3";
+
+package rest_grpc_graphql.grpc;
+
+option go_package = "pb/";
+
+message User {
+    string id = 1;
+    string name = 2;
+    repeated string flightIds = 3;
+}
